@@ -12,19 +12,44 @@ import { Card, CardContent } from "@/components/ui/card";
 export function ContactSection() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const form = e.currentTarget;
         setIsSubmitting(true);
+        setError(null);
 
-        // Simulate form submission
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const formData = new FormData(form);
+        const data = {
+            name: formData.get("name") as string,
+            email: formData.get("email") as string,
+            subject: formData.get("subject") as string,
+            message: formData.get("message") as string,
+        };
 
-        setIsSubmitting(false);
-        setIsSubmitted(true);
+        try {
+            const response = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
 
-        // Reset after 3 seconds
-        setTimeout(() => setIsSubmitted(false), 3000);
+            if (!response.ok) {
+                throw new Error("Failed to submit");
+            }
+
+            setIsSubmitted(true);
+            // Reset form
+            form.reset();
+            // Reset after 5 seconds
+            setTimeout(() => setIsSubmitted(false), 5000);
+        } catch (err) {
+            console.error(err);
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -85,6 +110,12 @@ export function ContactSection() {
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
+                                    {error && (
+                                        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                                            {error}
+                                        </div>
+                                    )}
+
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="name">Name</Label>

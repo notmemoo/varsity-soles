@@ -1,0 +1,126 @@
+// Prisma schema for Varsity Soles
+// Using Supabase PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== PRODUCTS ====================
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  brand       String
+  size        Float
+  price       Float
+  description String?
+  condition   String   // "new", "used", "restored"
+  images      String[] // Array of image URLs
+  category    String   // "sneakers", "accessories"
+  inStock     Boolean  @default(true)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orderItems  OrderItem[]
+}
+
+// ==================== ORDERS ====================
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique @default(cuid())
+  customerEmail   String
+  customerName    String
+  customerPhone   String?
+  shippingAddress Json
+  status          OrderStatus @default(PENDING)
+  subtotal        Float
+  shipping        Float       @default(0)
+  tax             Float       @default(0)
+  total           Float
+  paymentId       String?     // Square payment ID
+  paymentStatus   String?
+  notes           String?
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  size      Float
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// ==================== RESTORATION REQUESTS ====================
+
+model RestorationRequest {
+  id           String            @id @default(cuid())
+  requestNumber String           @unique @default(cuid())
+  customerName String
+  email        String
+  phone        String?
+  serviceType  String            // Service type from pricing list
+  sneakerBrand String
+  sneakerModel String
+  size         Float?
+  description  String            // Condition description
+  images       String[]          // Before photos
+  status       RestorationStatus @default(PENDING)
+  quote        Float?            // For custom quotes
+  estimatedCompletion DateTime?
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+enum RestorationStatus {
+  PENDING
+  QUOTED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  PICKED_UP
+  CANCELLED
+}
+
+// ==================== CONTACT SUBMISSIONS ====================
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ==================== ADMIN USERS ====================
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
