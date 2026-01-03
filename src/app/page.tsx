@@ -3,7 +3,7 @@ import {
   HeroSection,
   FeaturedSection,
   ServicesSection,
-  GallerySection,
+  RestorationsGallery,
   ContactSection,
 } from "@/components/sections";
 
@@ -15,7 +15,7 @@ export default function Home() {
         <HeroSection />
         <FeaturedSection />
         <ServicesSection />
-        <GallerySection />
+        <RestorationsGallery />
         <ContactSection />
       </main>
       <Footer />
