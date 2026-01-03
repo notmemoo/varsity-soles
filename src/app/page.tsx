@@ -13,9 +13,9 @@ export default function Home() {
       <Header />
       <main>
         <HeroSection />
+        <RestorationsGallery />
         <FeaturedSection />
         <ServicesSection />
-        <RestorationsGallery />
         <ContactSection />
       </main>
       <Footer />
